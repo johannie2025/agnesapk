@@ -1,5 +1,5 @@
 import { storage } from './storage.js';
-import { createVideo, getVideo, listVideoModels, taskId, extractUrl, extractStatus } from './api.js';
+import { KNOWN_MODELS, listModels, createVideo, getVideo, createImage, taskId, extractUrl, extractStatus } from './api.js';
 
 const $ = (id) => document.getElementById(id);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -45,11 +45,62 @@ function flash(msg, err = false) {
   el.className = `text-xs mt-2 ${err ? 'text-red-500' : 'text-emerald-500'}`;
 }
 
+// ---------- Onglets / modèles ----------
+let mode = 'video';
+let models = { image: [...KNOWN_MODELS.image], video: [...KNOWN_MODELS.video] };
+
+function renderModels() {
+  const sel = $('model');
+  sel.innerHTML = '';
+  models[mode].forEach((id) => sel.add(new Option(id, id)));
+}
+
+function setMode(m) {
+  mode = m;
+  const on = 'bg-white dark:bg-slate-800 shadow text-brand-500';
+  $('tab-video').className = `py-2 rounded-lg ${m === 'video' ? on : 'text-slate-500'}`;
+  $('tab-image').className = `py-2 rounded-lg ${m === 'image' ? on : 'text-slate-500'}`;
+  $('opts-video').classList.toggle('hidden', m !== 'video');
+  $('opts-image').classList.toggle('hidden', m !== 'image');
+  renderModels();
+  updateHint();
+}
+$('tab-video').onclick = () => setMode('video');
+$('tab-image').onclick = () => setMode('image');
+
+const getRefs = () => $('refs').value.split('\n').map((l) => l.trim()).filter(Boolean);
+
+function updateHint() {
+  const n = getRefs().length;
+  const h = $('refs-hint');
+  if (mode === 'video') h.textContent = n === 0 ? 'Texte → vidéo' : n === 1 ? 'Image → vidéo' : `Animation par images clés (${n} images)`;
+  else h.textContent = n === 0 ? 'Texte → image' : 'Image → image (référence + prompt)';
+}
+$('refs').addEventListener('input', updateHint);
+
+async function loadModels() {
+  const apiKey = storage.getKey();
+  if (!apiKey) return;
+  try {
+    const found = await listModels({ apiKey, baseUrl: storage.getBaseUrl() });
+    for (const k of ['image', 'video']) models[k] = [...new Set([...KNOWN_MODELS[k], ...found[k]])];
+    renderModels();
+  } catch { /* on garde le catalogue connu */ }
+}
+
 // ---------- Génération ----------
 function setStatus(msg, err = false) {
   const el = $('status');
   el.textContent = msg;
   el.className = `text-center text-sm ${err ? 'text-red-500' : 'text-slate-500'}`;
+}
+
+function link(url, label) {
+  const a = document.createElement('a');
+  a.href = url; a.target = '_blank'; a.rel = 'noopener'; a.download = '';
+  a.textContent = label;
+  a.className = 'block text-center text-sm underline text-brand-500';
+  return a;
 }
 
 function showVideo(url) {
@@ -58,11 +109,17 @@ function showVideo(url) {
   const v = document.createElement('video');
   v.src = url; v.controls = true; v.playsInline = true;
   v.className = 'w-full rounded-xl bg-black';
-  const a = document.createElement('a');
-  a.href = url; a.target = '_blank'; a.rel = 'noopener';
-  a.textContent = 'Ouvrir / télécharger la vidéo';
-  a.className = 'block text-center text-sm underline text-brand-500';
-  box.append(v, a);
+  box.append(v, link(url, 'Ouvrir / télécharger la vidéo'));
+}
+
+function showImages(urls) {
+  const box = $('result');
+  box.innerHTML = '';
+  urls.forEach((u, i) => {
+    const img = document.createElement('img');
+    img.src = u; img.className = 'w-full rounded-xl';
+    box.append(img, link(u, `Ouvrir / télécharger l'image ${i + 1}`));
+  });
 }
 
 const SIZES = { landscape: [1152, 768], portrait: [768, 1152], square: [768, 768] };
@@ -71,6 +128,7 @@ $('btn-generate').onclick = async () => {
   const apiKey = storage.getKey();
   const baseUrl = storage.getBaseUrl();
   const prompt = $('prompt').value.trim();
+  const images = getRefs();
   if (!apiKey) { $('settings').classList.remove('hidden'); return setStatus('Configurez votre clé API.', true); }
   if (!prompt) return setStatus('Entrez un prompt.', true);
 
@@ -80,8 +138,15 @@ $('btn-generate').onclick = async () => {
   setStatus('Envoi de la demande…');
 
   try {
+    if (mode === 'image') {
+      setStatus('Génération de l\'image…');
+      const urls = await createImage({ apiKey, baseUrl, model: $('model').value, prompt, size: $('img-size').value, n: $('img-n').value, images });
+      setStatus('Image prête ✅');
+      return showImages(urls);
+    }
+
     const [width, height] = SIZES[$('ratio').value];
-    const created = await createVideo({ apiKey, baseUrl, model: $('model').value, prompt, duration: $('duration').value, width, height });
+    const created = await createVideo({ apiKey, baseUrl, model: $('model').value, prompt, duration: $('duration').value, width, height, images });
     const id = taskId(created);
     if (!id) throw new Error("Pas d'identifiant de tâche dans la réponse de l'API.");
 
@@ -104,17 +169,6 @@ $('btn-generate').onclick = async () => {
   }
 };
 
-// ---------- Modèles vidéo (liste dynamique, repli sur agnes-video-v2.0) ----------
-async function loadModels() {
-  const apiKey = storage.getKey();
-  if (!apiKey) return;
-  try {
-    const ids = await listVideoModels({ apiKey, baseUrl: storage.getBaseUrl() });
-    if (!ids.length) return;
-    const sel = $('model');
-    sel.innerHTML = '';
-    ids.forEach((id) => sel.add(new Option(id, id)));
-  } catch { /* on garde la liste par défaut */ }
-}
+setMode('video');
 loadModels();
 $('btn-save').addEventListener('click', () => setTimeout(loadModels, 0));

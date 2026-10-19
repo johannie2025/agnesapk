@@ -42,24 +42,37 @@
   </section>
 
   <main class="flex-1 px-4 py-4 w-full max-w-md mx-auto space-y-4">
+    <div class="grid grid-cols-2 p-1 rounded-xl bg-slate-100 dark:bg-slate-900 text-sm font-medium">
+      <button id="tab-video" class="py-2 rounded-lg">🎬 Vidéo</button>
+      <button id="tab-image" class="py-2 rounded-lg">🖼️ Image</button>
+    </div>
+
     <div>
-      <label class="block text-sm font-medium mb-1" for="prompt">Prompt vidéo</label>
-      <textarea id="prompt" rows="4" placeholder="Décrivez la vidéo souhaitée..."
+      <label class="block text-sm font-medium mb-1" for="prompt">Prompt</label>
+      <textarea id="prompt" rows="4" placeholder="Décrivez ce que vous souhaitez créer..."
         class="w-full p-3 text-sm rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 focus:outline-none focus:border-brand-500"></textarea>
     </div>
 
-    <div class="grid grid-cols-3 gap-2">
-      <div>
-        <label class="block text-xs font-medium mb-1" for="model">Modèle</label>
-        <select id="model" class="w-full p-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900">
-          <option value="agnes-video-v2.0">agnes-video-v2.0</option>
-        </select>
-      </div>
+    <div>
+      <label class="block text-xs font-medium mb-1" for="model">Modèle</label>
+      <select id="model" class="w-full p-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900"></select>
+    </div>
+
+    <div>
+      <label class="block text-xs font-medium mb-1" for="refs">Images de référence (URL, une par ligne, facultatif)</label>
+      <textarea id="refs" rows="2" placeholder="https://..."
+        class="w-full p-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900"></textarea>
+      <p id="refs-hint" class="text-[11px] text-slate-500 mt-1"></p>
+    </div>
+
+    <div id="opts-video" class="grid grid-cols-2 gap-2">
       <div>
         <label class="block text-xs font-medium mb-1" for="duration">Durée</label>
         <select id="duration" class="w-full p-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900">
           <option value="5">5 s</option>
           <option value="10">10 s</option>
+          <option value="15">15 s</option>
+          <option value="18">18 s</option>
         </select>
       </div>
       <div>
@@ -72,9 +85,26 @@
       </div>
     </div>
 
+    <div id="opts-image" class="hidden grid grid-cols-2 gap-2">
+      <div>
+        <label class="block text-xs font-medium mb-1" for="img-size">Taille</label>
+        <select id="img-size" class="w-full p-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <option value="1024x768">Paysage 1024×768</option>
+          <option value="768x1024">Portrait 768×1024</option>
+          <option value="1024x1024">Carré 1024×1024</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium mb-1" for="img-n">Nombre</label>
+        <select id="img-n" class="w-full p-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <option>1</option><option>2</option><option>3</option><option>4</option>
+        </select>
+      </div>
+    </div>
+
     <button id="btn-generate"
       class="w-full py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-amber-600 to-orange-600 shadow-lg shadow-orange-900/20 active:scale-95 transition disabled:opacity-50">
-      Générer la vidéo
+      Générer
     </button>
 
     <div id="status" class="text-center text-sm text-slate-500"></div>
