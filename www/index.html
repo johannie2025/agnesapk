@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Agnes Video - Wise Design</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="min-h-screen flex flex-col bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors">
+
+  <header class="px-4 py-3 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/60 backdrop-blur sticky top-0 z-10">
+    <div>
+      <h1 class="font-bold text-lg text-brand-500 leading-tight">Agnes Video</h1>
+      <p class="text-[11px] text-slate-500">by Wise Design</p>
+    </div>
+    <div class="flex gap-2">
+      <button id="btn-theme" class="px-3 py-1.5 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800" aria-label="Thème">🌓</button>
+      <button id="btn-settings" class="px-3 py-1.5 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">⚙️ API</button>
+    </div>
+  </header>
+
+  <section id="settings" class="hidden px-4 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
+    <h2 class="text-sm font-semibold mb-1">Configuration API Agnes</h2>
+    <p class="text-xs text-slate-500 mb-3">Clé gratuite sur platform.agnes-ai.com. Votre clé reste sur cet appareil (stockage local). Elle n'est envoyée qu'à l'API Agnes.</p>
+
+    <label class="block text-xs font-medium mb-1" for="api-key">Clé API</label>
+    <div class="flex gap-2 mb-3">
+      <input id="api-key" type="password" autocomplete="off" placeholder="Collez votre clé API Agnes"
+        class="flex-1 min-w-0 p-2.5 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950">
+      <button id="btn-eye" class="px-3 rounded-lg border border-slate-300 dark:border-slate-700" aria-label="Afficher">👁</button>
+    </div>
+
+    <label class="block text-xs font-medium mb-1" for="base-url">URL de base de l'API</label>
+    <input id="base-url" type="url" placeholder="https://..."
+      class="w-full p-2.5 mb-3 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950">
+
+    <div class="flex gap-2">
+      <button id="btn-save" class="px-4 py-2 rounded-lg text-sm font-medium bg-brand-600 text-white">Enregistrer</button>
+      <button id="btn-clear" class="px-4 py-2 rounded-lg text-sm border border-slate-300 dark:border-slate-700">Effacer la clé</button>
+    </div>
+    <p id="settings-msg" class="text-xs mt-2 text-emerald-500"></p>
+  </section>
+
+  <main class="flex-1 px-4 py-4 w-full max-w-md mx-auto space-y-4">
+    <div>
+      <label class="block text-sm font-medium mb-1" for="prompt">Prompt vidéo</label>
+      <textarea id="prompt" rows="4" placeholder="Décrivez la vidéo souhaitée..."
+        class="w-full p-3 text-sm rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 focus:outline-none focus:border-brand-500"></textarea>
+    </div>
+
+    <div class="grid grid-cols-3 gap-2">
+      <div>
+        <label class="block text-xs font-medium mb-1" for="model">Modèle</label>
+        <select id="model" class="w-full p-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <option value="agnes-video-v2.0">agnes-video-v2.0</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium mb-1" for="duration">Durée</label>
+        <select id="duration" class="w-full p-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <option value="5">5 s</option>
+          <option value="10">10 s</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium mb-1" for="ratio">Format</label>
+        <select id="ratio" class="w-full p-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <option value="landscape">Paysage</option>
+          <option value="portrait">Portrait</option>
+          <option value="square">Carré</option>
+        </select>
+      </div>
+    </div>
+
+    <button id="btn-generate"
+      class="w-full py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-amber-600 to-orange-600 shadow-lg shadow-orange-900/20 active:scale-95 transition disabled:opacity-50">
+      Générer la vidéo
+    </button>
+
+    <div id="status" class="text-center text-sm text-slate-500"></div>
+    <div id="result" class="space-y-2"></div>
+  </main>
+
+  <footer class="px-4 py-4 text-center text-xs text-slate-500 border-t border-slate-200 dark:border-slate-900">
+    <span class="font-semibold text-brand-500">Wise Design</span> &bull; Support : <a class="underline" href="tel:+240222886007">+240 222 886 007</a>
+  </footer>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

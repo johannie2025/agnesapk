@@ -1,0 +1,19 @@
+{
+  "name": "agnes-video-wise-design",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Agnes Video Generator - Wise Design",
+  "scripts": {
+    "build:css": "tailwindcss -i ./src/input.css -o ./www/styles.css --minify",
+    "build": "npm run build:css",
+    "sync": "npm run build && npx cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/cli": "^6.1.2",
+    "@capacitor/core": "^6.1.2"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.14"
+  }
+}
