@@ -65,33 +65,43 @@
       <p id="refs-hint" class="text-[11px] text-slate-500 mt-1"></p>
     </div>
 
-    <div id="opts-video" class="grid grid-cols-2 gap-2">
+    <div id="opts-video" class="grid grid-cols-3 gap-2">
       <div>
         <label class="block text-xs font-medium mb-1" for="duration">Durée</label>
-        <select id="duration" class="w-full p-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900">
-          <option value="5">5 s</option>
-          <option value="10">10 s</option>
-          <option value="15">15 s</option>
-          <option value="18">18 s</option>
-        </select>
+        <select id="duration" class="w-full p-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900"></select>
       </div>
       <div>
         <label class="block text-xs font-medium mb-1" for="ratio">Format</label>
         <select id="ratio" class="w-full p-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900">
-          <option value="landscape">Paysage</option>
-          <option value="portrait">Portrait</option>
-          <option value="square">Carré</option>
+          <option value="9:16" selected>9:16 Portrait</option>
+          <option value="16:9">16:9 Paysage</option>
+          <option value="1:1">1:1 Carré</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium mb-1" for="vres">Qualité</label>
+        <select id="vres" class="w-full p-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <option value="720P" selected>HD 720p</option>
+          <option value="1080P">Full HD 1080p</option>
         </select>
       </div>
     </div>
 
-    <div id="opts-image" class="hidden grid grid-cols-2 gap-2">
+    <div id="opts-image" class="hidden grid grid-cols-3 gap-2">
       <div>
-        <label class="block text-xs font-medium mb-1" for="img-size">Taille</label>
-        <select id="img-size" class="w-full p-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900">
-          <option value="1024x768">Paysage 1024×768</option>
-          <option value="768x1024">Portrait 768×1024</option>
-          <option value="1024x1024">Carré 1024×1024</option>
+        <label class="block text-xs font-medium mb-1" for="img-ratio">Format</label>
+        <select id="img-ratio" class="w-full p-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <option value="9:16" selected>9:16 Portrait</option>
+          <option value="16:9">16:9 Paysage</option>
+          <option value="1:1">1:1 Carré</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium mb-1" for="img-quality">Qualité</label>
+        <select id="img-quality" class="w-full p-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <option value="1K">Standard 1K</option>
+          <option value="2K" selected>HD 2K</option>
+          <option value="4K">Ultra 4K</option>
         </select>
       </div>
       <div>

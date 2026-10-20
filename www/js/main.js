@@ -1,5 +1,5 @@
 import { storage } from './storage.js';
-import { KNOWN_MODELS, listModels, createVideo, getVideo, createImage, taskId, extractUrl, extractStatus } from './api.js';
+import { KNOWN_MODELS, listModels, createVideo, getVideo, createImage, taskId, extractUrl, extractStatus, videoSeconds, isFlash } from './api.js';
 
 const $ = (id) => document.getElementById(id);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -51,9 +51,27 @@ let models = { image: [...KNOWN_MODELS.image], video: [...KNOWN_MODELS.video] };
 
 function renderModels() {
   const sel = $('model');
+  const prev = sel.value;
   sel.innerHTML = '';
   models[mode].forEach((id) => sel.add(new Option(id, id)));
+  if (prev && models[mode].includes(prev)) sel.value = prev;
+  syncVideoOptions();
 }
+
+// Options vidéo dépendantes du modèle : durées, et 720p seulement pour les modèles « flash »
+function syncVideoOptions() {
+  if (mode !== 'video') return;
+  const m = $('model').value;
+  const dur = $('duration');
+  const prevDur = dur.value;
+  dur.innerHTML = '';
+  videoSeconds(m).forEach((s) => dur.add(new Option(`${s} s`, String(s))));
+  dur.value = [...dur.options].some((o) => o.value === prevDur) ? prevDur : dur.options[0].value;
+  const hd = [...$('vres').options].find((o) => o.value === '1080P');
+  if (hd) hd.disabled = isFlash(m);
+  if (isFlash(m)) $('vres').value = '720P';
+}
+$('model').addEventListener('change', syncVideoOptions);
 
 function setMode(m) {
   mode = m;
@@ -122,7 +140,6 @@ function showImages(urls) {
   });
 }
 
-const SIZES = { landscape: [1152, 768], portrait: [768, 1152], square: [768, 768] };
 
 $('btn-generate').onclick = async () => {
   const apiKey = storage.getKey();
@@ -140,13 +157,12 @@ $('btn-generate').onclick = async () => {
   try {
     if (mode === 'image') {
       setStatus('Génération de l\'image…');
-      const urls = await createImage({ apiKey, baseUrl, model: $('model').value, prompt, size: $('img-size').value, n: $('img-n').value, images });
+      const urls = await createImage({ apiKey, baseUrl, model: $('model').value, prompt, aspect: $('img-ratio').value, quality: $('img-quality').value, n: $('img-n').value, images });
       setStatus('Image prête ✅');
       return showImages(urls);
     }
 
-    const [width, height] = SIZES[$('ratio').value];
-    const created = await createVideo({ apiKey, baseUrl, model: $('model').value, prompt, duration: $('duration').value, width, height, images });
+    const created = await createVideo({ apiKey, baseUrl, model: $('model').value, prompt, seconds: $('duration').value, aspect: $('ratio').value, resolution: $('vres').value, images });
     const id = taskId(created);
     if (!id) throw new Error("Pas d'identifiant de tâche dans la réponse de l'API.");
 
