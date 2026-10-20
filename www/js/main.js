@@ -86,7 +86,56 @@ function setMode(m) {
 $('tab-video').onclick = () => setMode('video');
 $('tab-image').onclick = () => setMode('image');
 
-const getRefs = () => $('refs').value.split('\n').map((l) => l.trim()).filter(Boolean);
+// Images de référence : fichiers locaux -> data URL JPEG (côté long ≤ 768 px, qualité 75 %)
+let refs = [];
+const getRefs = () => refs;
+
+function fileToDataUrl(file, max = 768) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      resolve(c.toDataURL('image/jpeg', 0.75));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error(`Image illisible : ${file.name}`)); };
+    img.src = url;
+  });
+}
+
+function renderThumbs() {
+  const box = $('refs-thumbs');
+  box.innerHTML = '';
+  refs.forEach((u, i) => {
+    const w = document.createElement('div');
+    w.className = 'relative';
+    const im = document.createElement('img');
+    im.src = u; im.className = 'w-16 h-16 object-cover rounded-lg border border-slate-300 dark:border-slate-700';
+    const x = document.createElement('button');
+    x.type = 'button'; x.textContent = '×';
+    x.className = 'absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-600 text-white text-xs leading-5';
+    x.onclick = () => { refs.splice(i, 1); renderThumbs(); updateHint(); };
+    w.append(im, x);
+    box.append(w);
+  });
+  $('btn-refs-clear').classList.toggle('hidden', !refs.length);
+}
+
+$('btn-pick').onclick = () => $('refs-file').click();
+$('btn-refs-clear').onclick = () => { refs = []; renderThumbs(); updateHint(); };
+$('refs-file').addEventListener('change', async (e) => {
+  const files = [...e.target.files];
+  e.target.value = '';
+  try {
+    for (const f of files) refs.push(await fileToDataUrl(f));
+    if (refs.length > 4) refs = refs.slice(0, 4);
+    renderThumbs(); updateHint();
+  } catch (err) { setStatus(err.message, true); }
+});
 
 function updateHint() {
   const n = getRefs().length;
@@ -94,7 +143,6 @@ function updateHint() {
   if (mode === 'video') h.textContent = n === 0 ? 'Texte → vidéo' : n === 1 ? 'Image → vidéo' : `Animation par images clés (${n} images)`;
   else h.textContent = n === 0 ? 'Texte → image' : 'Image → image (référence + prompt)';
 }
-$('refs').addEventListener('input', updateHint);
 
 async function loadModels() {
   const apiKey = storage.getKey();

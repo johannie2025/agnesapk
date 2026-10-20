@@ -21,21 +21,45 @@ export const isModernImage = (m) => /2\.5/.test(m);
 export const isFlash = (m) => /flash/i.test(m);
 export const videoSeconds = (m) => (isLegacyVideo(m) ? [5, 10, 15, 18] : [4, 6, 8, 10, 12, 15]);
 
+const MAX_BODY = 1.5 * 1024 * 1024; // 1,5 Mo : au-delà, l'API peut répondre « Failed to read request body »
+
+// Transport : sur Android on appelle explicitement le plugin natif CapacitorHttp avec un objet JSON
+// (le patch automatique de fetch peut mal encoder le corps -> « Failed to read request body »).
+async function transport(url, options = {}) {
+  const cap = window.Capacitor;
+  const http = cap?.isNativePlatform?.() && cap.Plugins?.CapacitorHttp;
+  if (http) {
+    const r = await http.request({
+      url,
+      method: options.method || 'GET',
+      headers: options.headers || {},
+      data: options.body ? JSON.parse(options.body) : undefined,
+      responseType: 'text',
+    });
+    const text = typeof r.data === 'string' ? r.data : JSON.stringify(r.data ?? {});
+    return { status: r.status, text };
+  }
+  const res = await fetch(url, options);
+  return { status: res.status, text: await res.text() };
+}
+
 async function request(url, options, retries = 3) {
+  if (typeof options?.body === 'string' && options.body.length > MAX_BODY) {
+    throw new Error('Images de référence trop lourdes pour la requête : retirez-en ou choisissez des images plus petites.');
+  }
   for (let attempt = 0; ; attempt++) {
-    const res = await fetch(url, options);
+    const res = await transport(url, options);
     if (res.status === 429 && attempt < retries) {
       await sleep(2000 * 2 ** attempt);
       continue;
     }
-    const text = await res.text();
     let data;
-    try { data = JSON.parse(text); } catch { data = { raw: text }; }
-    if (!res.ok) {
+    try { data = JSON.parse(res.text); } catch { data = { raw: res.text }; }
+    if (res.status < 200 || res.status >= 300) {
       if (res.status === 401) throw new Error('Clé API invalide ou expirée (401).');
       if (res.status === 429) throw new Error('Trop de requêtes (429). Réessayez dans une minute.');
       const e = data?.error;
-      throw new Error((typeof e === 'string' ? e : e?.message) || data?.message || `Erreur HTTP ${res.status}`);
+      throw new Error((typeof e === 'string' ? e : e?.message) || data?.message || data?.raw || `Erreur HTTP ${res.status}`);
     }
     return data;
   }

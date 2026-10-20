@@ -59,9 +59,13 @@
     </div>
 
     <div>
-      <label class="block text-xs font-medium mb-1" for="refs">Images de référence (URL, une par ligne, facultatif)</label>
-      <textarea id="refs" rows="2" placeholder="https://..."
-        class="w-full p-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900"></textarea>
+      <span class="block text-xs font-medium mb-1">Images de référence (facultatif)</span>
+      <input id="refs-file" type="file" accept="image/*" multiple class="hidden">
+      <div class="flex gap-2">
+        <button id="btn-pick" type="button" class="flex-1 py-2.5 text-sm rounded-xl border border-dashed border-slate-400 dark:border-slate-600">📁 Choisir des images</button>
+        <button id="btn-refs-clear" type="button" class="hidden px-3 text-sm rounded-xl border border-slate-300 dark:border-slate-700">Vider</button>
+      </div>
+      <div id="refs-thumbs" class="flex flex-wrap gap-2 mt-2"></div>
       <p id="refs-hint" class="text-[11px] text-slate-500 mt-1"></p>
     </div>
 
